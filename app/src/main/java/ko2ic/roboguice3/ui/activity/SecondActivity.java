@@ -9,13 +9,16 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-import de.greenrobot.event.EventBus;
 import ko2ic.roboguice3.R;
 import ko2ic.roboguice3.application.facade.WeatherFacade;
 import ko2ic.roboguice3.infrastructure.repository.WeatherRepository;
 import ko2ic.roboguice3.infrastructure.repository.event.common.RuntimeExceptionEvent;
 import roboguice.activity.RoboAppCompatActivity;
+import roboguice.config.DefaultRoboModule;
+import roboguice.event.EventListener;
+import roboguice.event.EventManager;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -25,11 +28,25 @@ public class SecondActivity extends RoboAppCompatActivity {
     @Inject
     private WeatherFacade facade;
 
+    @Named(DefaultRoboModule.GLOBAL_EVENT_MANAGER_NAME)
+    @Inject
+    protected EventManager globalEventManager;
+
     @InjectView(R.id.editText)
     private EditText editText;
 
     @InjectView(R.id.button)
     private Button button;
+
+    // Roboguiceでやる場合
+    private EventListener listener = new EventListener<WeatherRepository.WeatherEventSuccess>() {
+        @Override
+        public void onEvent(WeatherRepository.WeatherEventSuccess event) {
+            Intent intent = new Intent(SecondActivity.this, ThirdActivity.class);
+            intent.putExtra("weather", event.getWeather());
+            startActivity(intent);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,21 +63,18 @@ public class SecondActivity extends RoboAppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // TODO roboguiceでできるか不明
-        //registerObserver(Object instance, Class<T> event)
-        EventBus.getDefault().register(this);
+        globalEventManager.registerObserver(WeatherRepository.WeatherEventSuccess.class, listener);
+//        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // TODO roboguiceでできるか不明
-        //unregisterObserver(Object instance, Class<T> event)
-        EventBus.getDefault().unregister(this);
+        globalEventManager.unregisterObserver(WeatherRepository.WeatherEventSuccess.class, listener);
+//        EventBus.getDefault().unregister(this);
     }
 
-    // TODO roboguiceでできるか不明
-//protected void onFinishedFetchByPk( @Observes WeatherEventSuccess event){
+    // 以下はEventBusでやる場合
     public void onEvent(WeatherRepository.WeatherEventSuccess event){
         Intent intent = new Intent(SecondActivity.this, ThirdActivity.class);
         intent.putExtra("weather", event.getWeather());

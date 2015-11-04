@@ -6,18 +6,36 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import de.greenrobot.event.EventBus;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import ko2ic.roboguice3.R;
 import ko2ic.roboguice3.infrastructure.repository.WeatherRepository;
 import roboguice.activity.RoboAppCompatActivity;
+import roboguice.config.DefaultRoboModule;
+import roboguice.event.EventListener;
+import roboguice.event.EventManager;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends RoboAppCompatActivity {
 
+    @Named(DefaultRoboModule.GLOBAL_EVENT_MANAGER_NAME)
+    @Inject
+    private EventManager globalEventManager;
+
     @InjectView(R.id.button)
     private Button button;
+
+    // Roboguiceでやる場合
+    private EventListener listener = new EventListener<WeatherRepository.WeatherEventSuccess>() {
+        @Override
+        public void onEvent(WeatherRepository.WeatherEventSuccess event) {
+            Toast toast = Toast.makeText(MainActivity.this, String.format("You got weater. %s", event.getWeather().title), Toast.LENGTH_LONG);
+            toast.show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,19 +53,18 @@ public class MainActivity extends RoboAppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // TODO roboguiceでできるか不明
-        //registerObserver(Object instance, Class<T> event)
-        EventBus.getDefault().register(this);
+        globalEventManager.registerObserver(WeatherRepository.WeatherEventSuccess.class, listener);
+//        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // TODO roboguiceでできるか不明
-        //unregisterObserver(Object instance, Class<T> event)
-        EventBus.getDefault().unregister(this);
+        globalEventManager.unregisterObserver(WeatherRepository.WeatherEventSuccess.class, listener);
+//        EventBus.getDefault().unregister(this);
     }
 
+    // EventBusでやる場合
     public void onEvent(WeatherRepository.WeatherEventSuccess event){
         Toast toast = Toast.makeText(this, String.format("You got weater. %s", event.getWeather().title), Toast.LENGTH_LONG);
         toast.show();

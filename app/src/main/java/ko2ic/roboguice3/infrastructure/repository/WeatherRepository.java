@@ -11,6 +11,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,10 +20,17 @@ import de.greenrobot.event.EventBus;
 import ko2ic.roboguice3.domain.model.Weather;
 import ko2ic.roboguice3.infrastructure.repository.event.common.AbstractHttpStatusErrorEvent;
 import ko2ic.roboguice3.infrastructure.repository.event.common.RuntimeExceptionEvent;
+import roboguice.config.DefaultRoboModule;
+import roboguice.event.EventManager;
 
 public class WeatherRepository {
 
     private Context mContext;
+
+    // Roboguiceでやる場合
+    @Named(DefaultRoboModule.GLOBAL_EVENT_MANAGER_NAME)
+    @Inject
+    protected EventManager globalEventManager;
 
     @Inject
     public WeatherRepository(Provider<Context> provider) {
@@ -44,7 +52,8 @@ public class WeatherRepository {
                             String title = response.getString("title");
 
                             entity.title = title;
-                            EventBus.getDefault().post(new WeatherEventSuccess(entity));
+//                            EventBus.getDefault().post(new WeatherEventSuccess(entity));
+                            globalEventManager.fire(new WeatherEventSuccess(entity));
                         } catch (JSONException e) {
                             EventBus.getDefault().post(new RuntimeExceptionEvent(e));
                         }
