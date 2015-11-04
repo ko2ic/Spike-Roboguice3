@@ -1,4 +1,4 @@
-package ko2ic.roboguice3;
+package ko2ic.roboguice3.ui.activity;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
