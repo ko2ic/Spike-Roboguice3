@@ -75,7 +75,7 @@ public class WeatherRepository {
 
     }
 
-    public class WeatherEventSuccess {
+    public static class WeatherEventSuccess {
 
         private Weather mWeather;
 

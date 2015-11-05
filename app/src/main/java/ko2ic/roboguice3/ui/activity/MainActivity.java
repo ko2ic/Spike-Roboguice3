@@ -29,7 +29,7 @@ public class MainActivity extends RoboAppCompatActivity {
     private Button button;
 
     // Roboguiceでやる場合
-    private EventListener listener = new EventListener<WeatherRepository.WeatherEventSuccess>() {
+    protected EventListener listener = new EventListener<WeatherRepository.WeatherEventSuccess>() {
         @Override
         public void onEvent(WeatherRepository.WeatherEventSuccess event) {
             Toast toast = Toast.makeText(MainActivity.this, String.format("You got weater. %s", event.getWeather().title), Toast.LENGTH_LONG);
@@ -65,8 +65,8 @@ public class MainActivity extends RoboAppCompatActivity {
     }
 
     // EventBusでやる場合
-    public void onEvent(WeatherRepository.WeatherEventSuccess event){
-        Toast toast = Toast.makeText(this, String.format("You got weater. %s", event.getWeather().title), Toast.LENGTH_LONG);
-        toast.show();
-    }
+//    public void onEvent(WeatherRepository.WeatherEventSuccess event){
+//        Toast toast = Toast.makeText(this, String.format("You got weater. %s", event.getWeather().title), Toast.LENGTH_LONG);
+//        toast.show();
+//    }
 }
